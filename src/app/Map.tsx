@@ -27,8 +27,8 @@ export function WorldMap({ position }: { position: Data["location"] }) {
         ref={globeRef}
         width={width}
         height={height}
-        globeImageUrl="/earth-night.jpg"
-        bumpImageUrl="/earth-topology.png"
+        globeImageUrl="/earth.jpg"
+        bumpImageUrl="/earth-black.png"
         backgroundImageUrl="/night-sky.png"
         onGlobeReady={() => {
           setGlobeReady(true);
