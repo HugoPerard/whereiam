@@ -15,7 +15,13 @@ const Globe = forwardRef((props: GlobeProps, ref) => (
 
 Globe.displayName = "Globe";
 
-export function WorldMap({ position }: { position: Data["location"] }) {
+export function WorldMap({
+  position,
+  history,
+}: {
+  position: Data["coordinates"];
+  history: Array<Data>;
+}) {
   const [globeReady, setGlobeReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<GlobeMethods>();
@@ -33,18 +39,38 @@ export function WorldMap({ position }: { position: Data["location"] }) {
         onGlobeReady={() => {
           setGlobeReady(true);
           if (!globeRef.current) return;
-          globeRef.current.pointOfView({ ...position, altitude: 1.5 });
+          globeRef.current.pointOfView({ ...position, altitude: 1.2 });
+          const controls = globeRef.current.controls();
+          controls.enableZoom = false;
         }}
-        htmlElementsData={[{ ...position }]}
-        htmlElement={() => {
-          const el = document.createElement("img");
-          el.src = "/avatar.png";
-          el.style.width = `${100}px`;
+        htmlElementsData={[
+          { ...position },
+          ...history.map((item) => item.coordinates),
+        ]}
+        htmlElement={(element) => {
+          if (
+            (element as typeof position).lat === position.lat &&
+            (element as typeof position).lng === position.lng
+          ) {
+            const el = document.createElement("img");
+            el.src = "/avatar.png";
+            el.style.width = `${80}px`;
 
-          el.style.pointerEvents = "auto";
-          el.style.cursor = "pointer";
-          el.style.borderRadius = "10rem";
-          return el;
+            el.style.pointerEvents = "auto";
+            el.style.cursor = "pointer";
+            el.style.borderRadius = "10rem";
+            return el;
+          } else {
+            const el = document.createElement("div");
+            el.style.height = `${20}px`;
+            el.style.width = `${20}px`;
+            el.style.borderRadius = "100%";
+            el.style.backgroundColor = "#FFFFFF80";
+
+            el.style.pointerEvents = "auto";
+            // el.style.cursor = "pointer";
+            return el;
+          }
         }}
       />
     </div>
