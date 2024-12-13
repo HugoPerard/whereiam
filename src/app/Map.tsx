@@ -107,7 +107,7 @@ export function WorldMap({
         arcDashLength={0.5}
         arcDashGap={1}
         arcDashInitialGap={1}
-        arcColor={() => "white"}
+        arcColor={() => "cyan"}
         arcDashAnimateTime={1000 * (position.flightTime ?? 1)}
         arcsTransitionDuration={0}
         arcStroke={0.5}

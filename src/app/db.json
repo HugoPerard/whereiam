@@ -1,0 +1,187 @@
+{
+  "last": null,
+  "history": [
+    {
+      "location": "Casablanca",
+      "flag": "🇲🇦",
+      "hello": "مرحبا",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 33.5731,
+        "lng": -7.5898
+      },
+      "flightTime": 3,
+      "count": 5,
+      "lastTime": 1734110053349
+    },
+    {
+      "location": "Miami",
+      "flag": "🇺🇸",
+      "hello": "Hello",
+      "timezoneOffset": -5,
+      "coordinates": {
+        "lat": 25.7617,
+        "lng": -80.1918
+      },
+      "flightTime": 10,
+      "count": 1,
+      "lastTime": 1734110453252
+    },
+    {
+      "location": "Barcelone",
+      "flag": "🇪🇸",
+      "hello": "Hola",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 41.3851,
+        "lng": 2.1734
+      },
+      "flightTime": 2,
+      "count": 2,
+      "lastTime": 1734110487492
+    },
+    {
+      "location": "Alicante",
+      "flag": "🇪🇸",
+      "hello": "Hola",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 38.346,
+        "lng": -0.4907
+      },
+      "flightTime": 2,
+      "count": 1,
+      "lastTime": 1734110503282
+    },
+    {
+      "location": "Valladolid",
+      "flag": "🇪🇸",
+      "hello": "Hola",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 41.6523,
+        "lng": -4.7245
+      },
+      "flightTime": 2,
+      "count": 1,
+      "lastTime": 1734110521932
+    },
+    {
+      "location": "London",
+      "flag": "🇬🇧",
+      "hello": "Hello",
+      "timezoneOffset": 0,
+      "coordinates": {
+        "lat": 51.5074,
+        "lng": -0.1278
+      },
+      "flightTime": 1,
+      "count": 1,
+      "lastTime": 1734110534047
+    },
+    {
+      "location": "Dubai",
+      "flag": "🇦🇪",
+      "hello": "مرحبا",
+      "timezoneOffset": 4,
+      "coordinates": {
+        "lat": 25.2048,
+        "lng": 55.2708
+      },
+      "flightTime": 7,
+      "count": 1,
+      "lastTime": 1734110548627
+    },
+    {
+      "location": "Hanoi",
+      "flag": "🇻🇳",
+      "hello": "Xin chào",
+      "timezoneOffset": 7,
+      "coordinates": {
+        "lat": 21.0285,
+        "lng": 105.8542
+      },
+      "flightTime": 11,
+      "count": 1,
+      "lastTime": 1734110601467
+    },
+    {
+      "location": "Kuala Lumpur",
+      "flag": "🇲🇾",
+      "hello": "Hai",
+      "timezoneOffset": 8,
+      "coordinates": {
+        "lat": 3.139,
+        "lng": 101.6869
+      },
+      "flightTime": 13,
+      "count": 1,
+      "lastTime": 1734110612319
+    },
+    {
+      "location": "Amsterdam",
+      "flag": "🇳🇱",
+      "hello": "Hallo",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 52.3676,
+        "lng": 4.9041
+      },
+      "flightTime": 1,
+      "count": 1,
+      "lastTime": 1734110666557
+    },
+    {
+      "location": "Copenhague",
+      "flag": "🇩🇰",
+      "hello": "Hej",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 55.6761,
+        "lng": 12.5683
+      },
+      "flightTime": 2,
+      "count": 1,
+      "lastTime": 1734110692943
+    },
+    {
+      "location": "Saint-Martin",
+      "flag": "🇫🇷",
+      "hello": "Bonjour",
+      "timezoneOffset": -4,
+      "coordinates": {
+        "lat": 18.0708,
+        "lng": -63.0501
+      },
+      "flightTime": 9,
+      "count": 2,
+      "lastTime": 1734110754974
+    },
+    {
+      "location": "Djerba",
+      "flag": "🇹🇳",
+      "hello": "مرحبا",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 33.8076,
+        "lng": 10.8453
+      },
+      "flightTime": 2.5,
+      "count": 2,
+      "lastTime": 1734110802284
+    },
+    {
+      "location": "Bangkok",
+      "flag": "🇹🇭",
+      "hello": "สวัสดี",
+      "timezoneOffset": 7,
+      "coordinates": {
+        "lat": 13.7563,
+        "lng": 100.5018
+      },
+      "flightTime": 12,
+      "count": 1,
+      "lastTime": 1734110866675
+    }
+  ]
+}

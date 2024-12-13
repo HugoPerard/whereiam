@@ -15,35 +15,89 @@ const zData = () =>
     timezoneOffset: z.number(),
     coordinates: z.object({ lat: z.number(), lng: z.number() }),
     flightTime: z.number().nullable(),
+
     // maybeDoing: z.array(z.object({ image: z.string(), label: z.string() })),
   });
 export type Data = z.infer<ReturnType<typeof zData>>;
 
+type DataWithHistory = Data & Partial<{ count: number; lastTime: number }>;
+
+const zDb = () =>
+  z.object({
+    last: z.string().nullable(),
+    history: z.array(
+      zData().merge(
+        z.object({ count: z.number().default(1), lastTime: z.number() })
+      )
+    ),
+  });
+export type Db = z.infer<ReturnType<typeof zDb>>;
+
 const getData = unstable_cache(
-  async (): Promise<{ current: Data; history: Array<Data> }> => {
-    const file = await fs.readFile(
-      process.cwd() + "/src/app/history.json",
-      "utf8"
-    );
-    const history: Array<Data> = JSON.parse(file);
+  async (): Promise<{
+    current: DataWithHistory;
+    history: Array<DataWithHistory>;
+  }> => {
+    const file = await fs.readFile(process.cwd() + "/src/app/db.json", "utf8");
+
+    const db = zDb().parse(JSON.parse(file));
 
     if (!process.env.LOCATION) {
-      return {
-        history,
-        current: DEFAULT_LOCATION,
-      };
+      if (!db.last) {
+        return {
+          history: db.history,
+          current: DEFAULT_LOCATION,
+        };
+      }
+
+      fs.writeFile(
+        process.cwd() + "/src/app/db.json",
+        JSON.stringify(
+          zDb().parse({
+            last: null,
+            history: db.history,
+          }),
+          null,
+          2
+        )
+      );
     }
 
-    const currentLocationFromHistory = history.find(
+    const currentLocationFromHistory = db.history.find(
       (item) => item.location === process.env.LOCATION
     );
 
     if (currentLocationFromHistory) {
+      const historyWithoutCurrent = db.history.filter(
+        (item) => item.location !== currentLocationFromHistory.location
+      );
+
+      if (db.last === process.env.LOCATION) {
+        return {
+          history: historyWithoutCurrent,
+          current: currentLocationFromHistory,
+        };
+      }
+
+      const updatedCurrent = {
+        ...currentLocationFromHistory,
+        count: currentLocationFromHistory.count + 1,
+        lastTime: new Date().getTime(),
+      };
+      fs.writeFile(
+        process.cwd() + "/src/app/db.json",
+        JSON.stringify(
+          zDb().parse({
+            last: process.env.LOCATION,
+            history: [...historyWithoutCurrent, updatedCurrent],
+          }),
+          null,
+          2
+        )
+      );
       return {
-        history: history.filter(
-          (item) => item.location !== currentLocationFromHistory.location
-        ),
-        current: currentLocationFromHistory,
+        history: historyWithoutCurrent,
+        current: updatedCurrent,
       };
     }
 
@@ -57,18 +111,29 @@ const getData = unstable_cache(
       * the translate of "Hello" in the main language of the place
       * the local timezone offset for today, the ${new Date().toISOString()}, taking care of time changes, I mean in the current timezone is UTC +2 give me 2, if it UTC -6 give me -6
       * the longitude and the latitude of the place.
-      * the number of hours of flight from Paris, rounded at the first superior integer`,
+      * an integer that is a rounded at the first superior of hours of flight time from Paris`,
       schema: zData(),
     });
 
-    const newValue = chatGptResponse.object;
+    const newValue = {
+      ...chatGptResponse.object,
+      count: 1,
+      lastTime: new Date().getTime(),
+    };
 
     fs.writeFile(
-      process.cwd() + "/src/app/history.json",
-      JSON.stringify([...history, newValue], null, 2)
+      process.cwd() + "/src/app/db.json",
+      JSON.stringify(
+        zDb().parse({
+          last: process.env.LOCATION,
+          history: [...db.history, newValue],
+        }),
+        null,
+        2
+      )
     );
 
-    return { current: newValue, history };
+    return { current: newValue, history: db.history };
   },
   [process.env.LOCATION ?? ""],
   { revalidate: 60 * 60 * 12 } // 60s * 60 * 12 = 12h
@@ -99,8 +164,19 @@ export default async function Home() {
             <p>
               I&apos;m currently{" "}
               <strong>
-                {data.current.location ?? "not too far from home"}
+                {data.current.location
+                  ? `in ${data.current.location}`
+                  : "not too far from home"}
               </strong>
+            </p>
+            {data.current.location && (
+              <p>
+                Number of times at this location : {data.current.count ?? 1}
+              </p>
+            )}
+            <p>
+              Destinations count :{" "}
+              {data.history.length + (process.env.LOCATION ? 1 : 0)}
             </p>
           </div>
         </div>
