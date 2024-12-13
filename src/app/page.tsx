@@ -5,6 +5,7 @@ import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { z } from "zod";
 import { promises as fs } from "fs";
+import { DEFAULT_LOCATION } from "@/app/constants";
 
 const zData = () =>
   z.object({
@@ -13,7 +14,8 @@ const zData = () =>
     hello: z.string(),
     timezoneOffset: z.number(),
     coordinates: z.object({ lat: z.number(), lng: z.number() }),
-    maybeDoing: z.array(z.object({ image: z.string(), label: z.string() })),
+    flightTime: z.number().nullable(),
+    // maybeDoing: z.array(z.object({ image: z.string(), label: z.string() })),
   });
 export type Data = z.infer<ReturnType<typeof zData>>;
 
@@ -28,18 +30,7 @@ const getData = unstable_cache(
     if (!process.env.LOCATION) {
       return {
         history,
-        current: {
-          location: null,
-          flag: "🇫🇷",
-          hello: "Bonjour",
-          timezoneOffset: 1,
-          coordinates: { lat: 49.439999, lng: 1.1 },
-          maybeDoing: [
-            { image: "/avatar.jpg", label: "Chilling 🎮📺🛋️" },
-            { image: "/avatar.jpg", label: "Playing football ⚽" },
-            { image: "/avatar.jpg", label: "Drinking some beers 🍻" },
-          ],
-        },
+        current: DEFAULT_LOCATION,
       };
     }
 
@@ -48,7 +39,12 @@ const getData = unstable_cache(
     );
 
     if (currentLocationFromHistory) {
-      return { history, current: currentLocationFromHistory };
+      return {
+        history: history.filter(
+          (item) => item.location !== currentLocationFromHistory.location
+        ),
+        current: currentLocationFromHistory,
+      };
     }
 
     const chatGptResponse = await generateObject({
@@ -61,7 +57,7 @@ const getData = unstable_cache(
       * the translate of "Hello" in the main language of the place
       * the local timezone offset for today, the ${new Date().toISOString()}, taking care of time changes, I mean in the current timezone is UTC +2 give me 2, if it UTC -6 give me -6
       * the longitude and the latitude of the place.
-      * Taking part of most popular things of the place, but also taking part that I'm a front web developer, that I love football, video games, drink beers with friend and travel, give me 3 things (a short label and a valid image url to illustrate) that I might be doing in this place.`,
+      * the number of hours of flight from Paris, rounded at the first superior integer`,
       schema: zData(),
     });
 
@@ -88,8 +84,9 @@ export default async function Home() {
       <Suspense fallback={<p>Loading...</p>}>
         <div className="flex flex-col h-screen w-screen">
           <WorldMap
-            position={data.current.coordinates}
+            position={data.current}
             history={data.history}
+            isOut={!!process.env.LOCATION}
           />
           <div className="absolute right-0 top-0 p-4 text-lg text-slate-200 z-10">
             {date.getUTCHours() + data.current.timezoneOffset}h
