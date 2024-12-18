@@ -2,19 +2,6 @@
   "last": null,
   "history": [
     {
-      "location": "Casablanca",
-      "flag": "🇲🇦",
-      "hello": "مرحبا",
-      "timezoneOffset": 1,
-      "coordinates": {
-        "lat": 33.5731,
-        "lng": -7.5898
-      },
-      "flightTime": 3,
-      "count": 5,
-      "lastTime": 1734110053349
-    },
-    {
       "location": "Miami",
       "flag": "🇺🇸",
       "hello": "Hello",
@@ -25,7 +12,7 @@
       },
       "flightTime": 10,
       "count": 1,
-      "lastTime": 1734110453252
+      "lastTime": 1732705200000
     },
     {
       "location": "Barcelone",
@@ -38,7 +25,7 @@
       },
       "flightTime": 2,
       "count": 2,
-      "lastTime": 1734110487492
+      "lastTime": 1732705200000
     },
     {
       "location": "Alicante",
@@ -51,7 +38,7 @@
       },
       "flightTime": 2,
       "count": 1,
-      "lastTime": 1734110503282
+      "lastTime": 1732705200000
     },
     {
       "location": "Valladolid",
@@ -64,7 +51,7 @@
       },
       "flightTime": 2,
       "count": 1,
-      "lastTime": 1734110521932
+      "lastTime": 1732705201000
     },
     {
       "location": "London",
@@ -77,7 +64,7 @@
       },
       "flightTime": 1,
       "count": 1,
-      "lastTime": 1734110534047
+      "lastTime": 1732705200000
     },
     {
       "location": "Dubai",
@@ -90,7 +77,7 @@
       },
       "flightTime": 7,
       "count": 1,
-      "lastTime": 1734110548627
+      "lastTime": 1732705200000
     },
     {
       "location": "Hanoi",
@@ -103,7 +90,7 @@
       },
       "flightTime": 11,
       "count": 1,
-      "lastTime": 1734110601467
+      "lastTime": 1732705200000
     },
     {
       "location": "Kuala Lumpur",
@@ -116,7 +103,7 @@
       },
       "flightTime": 13,
       "count": 1,
-      "lastTime": 1734110612319
+      "lastTime": 1732705200000
     },
     {
       "location": "Amsterdam",
@@ -129,7 +116,7 @@
       },
       "flightTime": 1,
       "count": 1,
-      "lastTime": 1734110666557
+      "lastTime": 1732705200000
     },
     {
       "location": "Copenhague",
@@ -142,7 +129,7 @@
       },
       "flightTime": 2,
       "count": 1,
-      "lastTime": 1734110692943
+      "lastTime": 1732705200000
     },
     {
       "location": "Saint-Martin",
@@ -155,7 +142,7 @@
       },
       "flightTime": 9,
       "count": 2,
-      "lastTime": 1734110754974
+      "lastTime": 1732705200000
     },
     {
       "location": "Djerba",
@@ -168,7 +155,7 @@
       },
       "flightTime": 2.5,
       "count": 2,
-      "lastTime": 1734110802284
+      "lastTime": 1732705200000
     },
     {
       "location": "Bangkok",
@@ -181,7 +168,20 @@
       },
       "flightTime": 12,
       "count": 1,
-      "lastTime": 1734110866675
+      "lastTime": 1732705200000
+    },
+    {
+      "location": "Casablanca",
+      "flag": "🇲🇦",
+      "hello": "مرحبا",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 33.5731,
+        "lng": -7.5898
+      },
+      "flightTime": 3,
+      "count": 5,
+      "lastTime": 1732705500000
     }
   ]
 }

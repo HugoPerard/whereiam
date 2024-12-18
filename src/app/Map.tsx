@@ -27,14 +27,14 @@ export function WorldMap({
   position,
   history,
   isOut = false,
-}: {
+}: Readonly<{
   position: Data;
   history: Array<Data>;
   isOut: boolean;
-}) {
+}>) {
   const [globeReady, setGlobeReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const globeRef = useRef<GlobeMethods>();
+  const globeRef = useRef<GlobeMethods>(null);
   const { width, height } = useElementDimensions(containerRef, globeReady);
 
   return (
@@ -44,7 +44,7 @@ export function WorldMap({
         width={width}
         height={height}
         globeImageUrl="/earth.jpg"
-        bumpImageUrl="/earth-black.png"
+        bumpImageUrl="/earth-black.jpg"
         onGlobeReady={() => {
           setGlobeReady(true);
           if (!globeRef.current) return;
@@ -123,7 +123,7 @@ export function WorldMap({
 }
 
 function useElementDimensions(
-  elementRef: RefObject<HTMLElement>,
+  elementRef: RefObject<HTMLElement | null>,
   isReady: boolean
 ) {
   const [elementDimensions, setElementDimensions] = useState({

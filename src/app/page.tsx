@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { z } from "zod";
 import { promises as fs } from "fs";
 import { DEFAULT_LOCATION } from "@/app/constants";
+import { InformationCard } from "@/components/InformationCard";
+import { Topbar } from "@/components/Topbar";
 
 const zData = () =>
   z.object({
@@ -20,7 +22,9 @@ const zData = () =>
   });
 export type Data = z.infer<ReturnType<typeof zData>>;
 
-type DataWithHistory = Data & Partial<{ count: number; lastTime: number }>;
+export type DataWithHistory = Data & { count: number; lastTime: number };
+export type DataWithPartialHistory = Data &
+  Partial<{ count: number; lastTime: number }>;
 
 const zDb = () =>
   z.object({
@@ -35,7 +39,7 @@ export type Db = z.infer<ReturnType<typeof zDb>>;
 
 const getData = unstable_cache(
   async (): Promise<{
-    current: DataWithHistory;
+    current: DataWithPartialHistory;
     history: Array<DataWithHistory>;
   }> => {
     const file = await fs.readFile(process.cwd() + "/src/app/db.json", "utf8");
@@ -142,8 +146,6 @@ const getData = unstable_cache(
 export default async function Home() {
   const data = await getData();
 
-  const date = new Date();
-
   return (
     <main className="flex flex-col">
       <Suspense fallback={<p>Loading...</p>}>
@@ -153,48 +155,10 @@ export default async function Home() {
             history={data.history}
             isOut={!!process.env.LOCATION}
           />
-          <div className="absolute right-0 top-0 p-4 text-lg text-slate-200 z-10">
-            {date.getUTCHours() + data.current.timezoneOffset}h
-            {date.getMinutes().toString().padStart(2, "0")} {data.current.flag}
-          </div>
-          <div className="absolute left-0 right-0 bottom-0 p-8 text-lg text-slate-200 z-10">
-            <p className="bold">
-              {data.current.hello} 👋{data.current.flag}
-            </p>
-            <p>
-              I&apos;m currently{" "}
-              <strong>
-                {data.current.location
-                  ? `in ${data.current.location}`
-                  : "not too far from home"}
-              </strong>
-            </p>
-            {data.current.location && (
-              <p>
-                Number of times at this location : {data.current.count ?? 1}
-              </p>
-            )}
-            <p>
-              Destinations count :{" "}
-              {data.history.length + (process.env.LOCATION ? 1 : 0)}
-            </p>
-          </div>
         </div>
+        <Topbar />
+        <InformationCard data={data} />
       </Suspense>
-      {/* <div className="flex flex-col p-8 gap-4">
-        <p>I&apos;m certainly doing one of this stuff:</p>
-        <div className="flex grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {data.maybeDoing.map((data) => (
-            <div
-              key={data.label}
-              className="flex flex-col flex-1 bg-white bg-opacity-20 p-4 rounded-md"
-            >
-              <p>{data.label}</p>
-              <img alt={data.label} src={data.image} />
-            </div>
-          ))}
-        </div>
-      </div> */}
     </main>
   );
 }
