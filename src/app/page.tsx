@@ -37,14 +37,22 @@ const zDb = () =>
   });
 export type Db = z.infer<ReturnType<typeof zDb>>;
 
+const DB_PATH = "/db.json";
+
 const getData = unstable_cache(
   async (): Promise<{
     current: DataWithPartialHistory;
     history: Array<DataWithHistory>;
   }> => {
-    const file = await fs.readFile(process.cwd() + "/src/app/db.json", "utf8");
+    const file = await fs.readFile(process.cwd() + DB_PATH, "utf8");
 
-    const db = zDb().parse(JSON.parse(file));
+    const dbParsed = zDb().safeParse(JSON.parse(file));
+
+    if (!dbParsed.success) {
+      throw new Error("Error while parsing the db", dbParsed.error);
+    }
+
+    const db = dbParsed.data;
 
     if (!process.env.LOCATION) {
       if (!db.last) {
@@ -55,7 +63,7 @@ const getData = unstable_cache(
       }
 
       fs.writeFile(
-        process.cwd() + "/src/app/db.json",
+        process.cwd() + DB_PATH,
         JSON.stringify(
           zDb().parse({
             last: null,
@@ -89,7 +97,7 @@ const getData = unstable_cache(
         lastTime: new Date().getTime(),
       };
       fs.writeFile(
-        process.cwd() + "/src/app/db.json",
+        process.cwd() + DB_PATH,
         JSON.stringify(
           zDb().parse({
             last: process.env.LOCATION,
@@ -126,7 +134,7 @@ const getData = unstable_cache(
     };
 
     fs.writeFile(
-      process.cwd() + "/src/app/db.json",
+      process.cwd() + DB_PATH,
       JSON.stringify(
         zDb().parse({
           last: process.env.LOCATION,

@@ -182,6 +182,19 @@
       "flightTime": 3,
       "count": 5,
       "lastTime": 1732705500000
+    },
+    {
+      "location": "Manchester",
+      "flag": "🇬🇧",
+      "hello": "Hello",
+      "timezoneOffset": 1,
+      "coordinates": {
+        "lat": 53.4808,
+        "lng": -2.2426
+      },
+      "flightTime": 1,
+      "count": 1,
+      "lastTime": 1767006000000
     }
   ]
 }
