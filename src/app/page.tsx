@@ -93,17 +93,19 @@ export default async function Home() {
   const data = await getData();
 
   return (
-    <main className="flex flex-col">
-      <Suspense fallback={<p>Loading...</p>}>
-        <div className="flex flex-col h-screen w-screen">
-          <WorldMap
-            position={data.current}
-            history={data.history}
-            isOut={!!process.env.LOCATION}
-          />
+    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <Suspense fallback={<div className="flex h-screen items-center justify-center text-slate-400">Loading...</div>}>
+        <div className="relative flex min-h-screen w-full items-center justify-center p-4 md:p-8">
+          <div className="relative h-[min(70vh,520px)] w-full max-w-3xl overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10">
+            <WorldMap
+              position={data.current}
+              history={data.history}
+              isOut={!!process.env.LOCATION}
+            />
+          </div>
+          <Topbar />
+          <InformationCard data={data} />
         </div>
-        <Topbar />
-        <InformationCard data={data} />
       </Suspense>
     </main>
   );

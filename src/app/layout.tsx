@@ -18,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className={`${arOneSans.variable}  antialiased`}>{children}</body>
+    <html lang="fr" className="dark">
+      <body className={`${arOneSans.variable} antialiased bg-slate-950 text-slate-100`}>{children}</body>
     </html>
   );
 }

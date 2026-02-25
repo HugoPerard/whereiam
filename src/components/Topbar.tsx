@@ -4,17 +4,36 @@ import Link from "next/link";
 
 export const Topbar = () => {
   return (
-    <div className="absolute z-10 top-0 right-0 m-2 flex gap-2">
-      <Link href="https://prdhugo.fr" target="_blank">
-        <p className="rounded-full border-gray-200 border-2 bg-white bg-opacity-50 shadow-lg h-10 w-10 justify-items-center overflow-hidden">
-          <Image alt="Hugo Pérard's avatar" src="/avatar.png" width={40} height={40} />
-        </p>
-      </Link>
-      <Link href="https://github.com/HugoPerard/whereiam" target="_blank">
-        <p className="rounded-full border-gray-200 border-2 bg-white bg-opacity-50 text-gray-800 shadow-lg h-10 w-10 justify-items-center">
-          <GithubIcon size="1.4rem" className="mt-1.5" />
-        </p>
-      </Link>
-    </div>
+    <nav className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-4 py-3 md:px-8">
+      <span className="text-sm font-medium tracking-wide text-slate-400">
+        Where I&apos;m
+      </span>
+      <div className="flex items-center gap-2">
+        <Link
+          href="https://prdhugo.fr"
+          target="_blank"
+          className="rounded-full p-1.5 transition-colors hover:bg-white/10"
+          aria-label="Hugo Pérard"
+        >
+          <div className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white/20">
+            <Image
+              alt="Hugo Pérard's avatar"
+              src="/avatar.png"
+              width={36}
+              height={36}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </Link>
+        <Link
+          href="https://github.com/HugoPerard/whereiam"
+          target="_blank"
+          className="rounded-full p-2 transition-colors hover:bg-white/10"
+          aria-label="GitHub"
+        >
+          <GithubIcon size={20} className="text-slate-300" />
+        </Link>
+      </div>
+    </nav>
   );
 };
