@@ -10,14 +10,14 @@ import {
 } from "react";
 import dynamic from "next/dynamic";
 import { type GlobeProps, type GlobeMethods } from "react-globe.gl";
-import { Data } from "@/app/page";
+import type { Data } from "@/app/page";
 import { DEFAULT_LOCATION } from "@/app/constants";
 
 const GlobeTmpl = dynamic(() => import("./Globe"), {
   ssr: false,
 });
 
-const Globe = forwardRef((props: GlobeProps, ref) => (
+const Globe = forwardRef<GlobeMethods, GlobeProps>((props, ref) => (
   <GlobeTmpl {...props} forwardRef={ref} />
 ));
 
@@ -43,8 +43,10 @@ export function WorldMap({
         ref={globeRef}
         width={width}
         height={height}
-        globeImageUrl="/earth.jpg"
-        bumpImageUrl="/earth-black.jpg"
+        globeImageUrl="https://unpkg.com/three-globe@2.31.3/example/img/earth-blue-marble.jpg"
+        backgroundColor="rgba(0,0,0,0)"
+        showAtmosphere={true}
+        atmosphereColor="rgba(34, 211, 238, 0.15)"
         onGlobeReady={() => {
           setGlobeReady(true);
           if (!globeRef.current) return;
@@ -59,7 +61,7 @@ export function WorldMap({
           ...item.coordinates,
           name: item.location,
         }))}
-        pointColor={useCallback(() => "white", [])}
+        pointColor={useCallback(() => "rgba(148, 163, 184, 0.9)", [])}
         htmlElementsData={[
           { ...position.coordinates },
           ...history.map((item) => item.coordinates),
@@ -84,7 +86,7 @@ export function WorldMap({
             el.style.height = `${20}px`;
             el.style.width = `${20}px`;
             el.style.borderRadius = "100%";
-            el.style.backgroundColor = "#FFFFFF90";
+            el.style.backgroundColor = "rgba(148, 163, 184, 0.8)";
 
             el.style.pointerEvents = "auto";
             // el.style.cursor = "pointer";
@@ -107,13 +109,13 @@ export function WorldMap({
         arcDashLength={0.5}
         arcDashGap={1}
         arcDashInitialGap={1}
-        arcColor={() => "cyan"}
+        arcColor={() => "rgba(34, 211, 238, 0.8)"}
         arcDashAnimateTime={1000 * (position.flightTime ?? 1)}
         arcsTransitionDuration={0}
         arcStroke={0.5}
         // position ring
         ringsData={[position.coordinates]}
-        ringColor={() => (t: number) => `rgba(255,255,255,${1 - t})`}
+        ringColor={() => (t: number) => `rgba(34, 211, 238, ${0.6 * (1 - t)})`}
         ringMaxRadius={5}
         ringPropagationSpeed={5}
         ringRepeatPeriod={((position.flightTime ?? 100) * 0.5) / 3}
