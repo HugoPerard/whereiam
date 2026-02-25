@@ -16,7 +16,7 @@ export const InformationCard = ({
     (placeA, placeB) => (placeB.count ?? 0) - (placeA.count ?? 0)
   )?.[0];
 
-  const lastVisited = data.history.sort(
+  const lastVisited = [...data.history].sort(
     (placeA, placeB) => (placeB.lastTime ?? 0) - (placeA.lastTime ?? 0)
   )?.[0];
 

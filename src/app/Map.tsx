@@ -10,14 +10,14 @@ import {
 } from "react";
 import dynamic from "next/dynamic";
 import { type GlobeProps, type GlobeMethods } from "react-globe.gl";
-import { Data } from "@/app/page";
+import type { Data } from "@/app/page";
 import { DEFAULT_LOCATION } from "@/app/constants";
 
 const GlobeTmpl = dynamic(() => import("./Globe"), {
   ssr: false,
 });
 
-const Globe = forwardRef((props: GlobeProps, ref) => (
+const Globe = forwardRef<GlobeMethods, GlobeProps>((props, ref) => (
   <GlobeTmpl {...props} forwardRef={ref} />
 ));
 
