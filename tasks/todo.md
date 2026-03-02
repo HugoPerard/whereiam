@@ -1,3 +1,19 @@
+# Location Avatar on Glob
+
+## Plan
+- [x] Create avatar generation (favicon + location badge SVG)
+- [x] Extend location schema with avatarPath
+- [x] Generate avatar on new location, store in public/avatars/
+- [x] Display custom avatar on glob marker (fallback: favicon)
+
+## Avatar
+- Base: prdhugo.fr/favicon.svg (shoulder-to-head circular clip)
+- Badge: flag emoji overlay (bottom-right)
+- Storage: public/avatars/{hash}.svg
+- Display: globe marker uses avatarPath or favicon fallback
+
+---
+
 # Rework: Dependencies + Storage Cleanup
 
 ## Plan
