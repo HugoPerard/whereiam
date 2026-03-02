@@ -67,30 +67,30 @@ export default async function Home() {
   const data = await getData();
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-black">
       <Suspense
         fallback={
-          <div className="flex h-screen items-center justify-center text-white/60">
+          <div className="flex h-full items-center justify-center text-white/60">
             Loading...
           </div>
         }
       >
-        <div className="relative flex min-h-screen flex-col items-center justify-center">
-          <div className="home-main relative z-10 flex w-full max-w-md flex-col items-center text-center">
-            <div className="home-subtitle mb-1 flex flex-col gap-0.5 text-sm font-medium tracking-widest uppercase">
+        <div className="flex h-full min-h-0 flex-col items-center justify-center overflow-hidden">
+          <div className="home-main relative z-10 flex w-full max-w-md flex-1 flex-col items-center justify-center gap-0 overflow-hidden px-4 text-center">
+            <div className="home-subtitle mb-0.5 flex shrink-0 flex-col gap-0 text-sm font-medium tracking-widest uppercase">
               <span className="text-xs">Where Is</span>
               <span>{process.env.NAME ?? "prdHugo"}</span>
             </div>
-            <div className="relative h-[min(70vh,480px)] aspect-square w-full max-w-2xl overflow-hidden">
+            <div className="relative aspect-square w-full max-w-2xl flex-1 min-h-0 overflow-hidden">
               <WorldMap position={data.current} />
             </div>
-            <p className="home-title mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            <p className="home-title mt-1 shrink-0 font-display text-2xl font-bold tracking-tight sm:text-3xl">
               {data.current.location ?? "Not far from home"}
             </p>
-            <p className="home-subtitle mt-1 text-sm">
+            <p className="home-subtitle mt-0.5 shrink-0 text-sm">
               {data.current.hello} 👋 {data.current.flag}
             </p>
-            <div className="home-divider my-6 h-px w-12" />
+            <div className="home-divider my-3 shrink-0 h-px w-12" />
             <Links />
           </div>
         </div>
