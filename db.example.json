@@ -1,0 +1,13 @@
+{
+  "current": {
+    "location": "Hanoï, Vietnam",
+    "flag": "🇻🇳",
+    "hello": "Xin chào",
+    "timezoneOffset": 7,
+    "coordinates": {
+      "lat": 21.0285,
+      "lng": 105.8542
+    },
+    "flightTime": 11
+  }
+}
