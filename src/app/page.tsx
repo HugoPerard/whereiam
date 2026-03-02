@@ -4,56 +4,39 @@ import { generateObject } from "ai";
 import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { z } from "zod";
-import { readDb, writeDb, dbSchema, locationSchema, type Db } from "@/lib/db";
+import { readDb, writeDb, locationSchema } from "@/lib/db";
 import { DEFAULT_LOCATION } from "@/app/constants";
-import { InformationCard } from "@/components/InformationCard";
-import { Topbar } from "@/components/Topbar";
+import { Links } from "@/components/Links";
+import { getCurrentCalendarLocation } from "@/lib/calendar";
 
 export type Data = z.infer<typeof locationSchema>;
-export type DataWithHistory = Data & { count: number; lastTime: number };
-export type DataWithPartialHistory = Data &
-  Partial<{ count: number; lastTime: number }>;
 
-async function getDataUncached(): Promise<{
-  current: DataWithPartialHistory;
-  history: Array<DataWithHistory>;
-}> {
+async function getDataUncached(): Promise<{ current: Data }> {
   const db = await readDb();
-  const location = process.env.LOCATION;
+  const calendarIcsUrl = process.env.CALENDAR_ICS?.trim() || null;
+  let calendarLocation: Awaited<ReturnType<typeof getCurrentCalendarLocation>> =
+    null;
 
-  if (!location) {
-    if (db.last) {
-      await writeDb({ last: null, history: db.history });
+  if (calendarIcsUrl) {
+    try {
+      calendarLocation = await getCurrentCalendarLocation(calendarIcsUrl);
+    } catch (error) {
+      console.error("Failed to resolve calendar location", error);
     }
-    return {
-      history: db.history,
-      current: DEFAULT_LOCATION,
-    };
   }
 
-  const existing = db.history.find((item) => item.location === location);
+  const location = calendarLocation?.location ?? null;
 
-  if (existing) {
-    const historyWithoutCurrent = db.history.filter(
-      (item) => item.location !== existing.location
-    );
-    const updated = {
-      ...existing,
-      count: existing.count + 1,
-      lastTime: Date.now(),
-    };
-
-    if (db.last !== location) {
-      await writeDb({
-        last: location,
-        history: [...historyWithoutCurrent, updated],
-      });
+  if (!location) {
+    if (db.current) {
+      await writeDb({ current: null });
     }
+    return { current: DEFAULT_LOCATION };
+  }
 
-    return {
-      history: historyWithoutCurrent,
-      current: updated,
-    };
+  const cached = db.current;
+  if (cached?.location === location) {
+    return { current: cached };
   }
 
   const { object } = await generateObject({
@@ -68,43 +51,48 @@ async function getDataUncached(): Promise<{
     schema: locationSchema,
   });
 
-  const newEntry = {
-    ...object,
-    count: 1,
-    lastTime: Date.now(),
-  };
+  const newEntry: Data = { ...object };
+  await writeDb({ current: newEntry });
 
-  const newDb: Db = dbSchema.parse({
-    last: location,
-    history: [...db.history, newEntry],
-  });
-  await writeDb(newDb);
-
-  return { current: newEntry, history: db.history };
+  return { current: newEntry };
 }
 
 const getData = unstable_cache(
   getDataUncached,
-  [process.env.LOCATION ?? ""],
-  { revalidate: 60 * 60 } // 1 hour
+  [process.env.CALENDAR_ICS ?? ""],
+  { revalidate: 60 * 5 }, // 5 minutes
 );
 
 export default async function Home() {
   const data = await getData();
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <Suspense fallback={<div className="flex h-screen items-center justify-center text-slate-400">Loading...</div>}>
-        <div className="relative flex min-h-screen w-full items-center justify-center p-4 md:p-8">
-          <div className="relative h-[min(70vh,520px)] w-full max-w-3xl overflow-hidden rounded-2xl shadow-2xl shadow-black/50 ring-1 ring-white/10">
-            <WorldMap
-              position={data.current}
-              history={data.history}
-              isOut={!!process.env.LOCATION}
-            />
+    <main className="min-h-screen bg-black">
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center text-white/60">
+            Loading...
           </div>
-          <Topbar />
-          <InformationCard data={data} />
+        }
+      >
+        <div className="relative flex min-h-screen flex-col items-center justify-center">
+          <div className="home-main relative z-10 flex w-full max-w-md flex-col items-center text-center">
+            <div className="home-subtitle mb-1 flex flex-col gap-0.5 text-sm font-medium tracking-widest uppercase">
+              <span className="text-xs">Where Is</span>
+              <span>{process.env.NAME ?? "prdHugo"}</span>
+            </div>
+            <div className="relative h-[min(70vh,480px)] aspect-square w-full max-w-2xl overflow-hidden">
+              <WorldMap position={data.current} />
+            </div>
+            <p className="home-title mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              {data.current.location ?? "—"}
+            </p>
+            <p className="home-subtitle mt-1 text-sm">
+              {data.current.hello} 👋 {data.current.flag}
+            </p>
+            <div className="home-divider my-6 h-px w-12" />
+            <Links />
+          </div>
         </div>
       </Suspense>
     </main>

@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { AR_One_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Sono } from "next/font/google";
 import "./globals.css";
 
-const arOneSans = AR_One_Sans({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-ar-one-sans",
+  variable: "--font-bricolage",
+});
+
+const sono = Sono({
+  subsets: ["latin"],
+  variable: "--font-sono",
 });
 
 export const metadata: Metadata = {
-  title: "Where I'm",
+  title: `Where is ${process.env.NAME ?? "prdHugo"}`,
   description: "See where currently I'm, and some stuff about that",
 };
 
@@ -18,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="dark">
-      <body className={`${arOneSans.variable} antialiased bg-slate-950 text-slate-100`}>{children}</body>
+    <html lang="fr" className={`${bricolage.variable} ${sono.variable}`}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
