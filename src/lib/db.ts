@@ -10,6 +10,7 @@ export const locationSchema = z.object({
   timezoneOffset: z.number(),
   coordinates: z.object({ lat: z.number(), lng: z.number() }),
   flightTime: z.number().nullable(),
+  avatarPath: z.string().optional(),
 });
 
 const cacheSchema = z.object({

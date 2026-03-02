@@ -5,6 +5,7 @@ import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { z } from "zod";
 import { readDb, writeDb, locationSchema } from "@/lib/db";
+import { generateLocationAvatar } from "@/lib/avatar";
 import { DEFAULT_LOCATION } from "@/app/constants";
 import { Links } from "@/components/Links";
 import { getCurrentCalendarLocation } from "@/lib/calendar";
@@ -52,6 +53,14 @@ async function getDataUncached(): Promise<{ current: Data }> {
   });
 
   const newEntry: Data = { ...object };
+  try {
+    newEntry.avatarPath = await generateLocationAvatar({
+      location: newEntry.location ?? location,
+      flag: newEntry.flag,
+    });
+  } catch (err) {
+    console.error("Failed to generate location avatar", err);
+  }
   await writeDb({ current: newEntry });
 
   return { current: newEntry };

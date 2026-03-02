@@ -65,7 +65,9 @@ export function WorldMap({ position }: Readonly<{ position: Data }>) {
           htmlLng="lng"
           htmlElement={() => {
             const el = document.createElement("img");
-            el.src = "https://prdHugo.fr/favicon.svg";
+            el.src = position.avatarPath
+              ? position.avatarPath
+              : "https://prdHugo.fr/favicon.svg";
             el.alt = "";
             el.width = 80;
             el.height = 80;
