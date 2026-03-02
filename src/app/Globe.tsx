@@ -1,11 +1,17 @@
 "use client";
 
 import GlobeTmpl from "react-globe.gl";
+import type { GlobeProps, GlobeMethods } from "react-globe.gl";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Globe = ({ forwardRef, ...otherProps }: any) => (
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  <GlobeTmpl {...otherProps} ref={forwardRef} />
+type GlobeWrapperProps = GlobeProps & {
+  forwardRef?: React.Ref<GlobeMethods | null>;
+};
+
+const Globe = ({ forwardRef, ...props }: GlobeWrapperProps) => (
+  <GlobeTmpl
+    {...props}
+    ref={forwardRef ? (forwardRef as React.RefObject<GlobeMethods>) : undefined}
+  />
 );
 
 export default Globe;

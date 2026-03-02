@@ -1,131 +1,110 @@
 "use client";
 
-import {
-  type RefObject,
-  useEffect,
-  useRef,
-  useState,
-  forwardRef,
-  useCallback,
-} from "react";
+import { type RefObject, useEffect, useRef, useState, forwardRef } from "react";
 import dynamic from "next/dynamic";
 import { type GlobeProps, type GlobeMethods } from "react-globe.gl";
-import { Data } from "@/app/page";
-import { DEFAULT_LOCATION } from "@/app/constants";
+import type { Data } from "@/app/page";
 
 const GlobeTmpl = dynamic(() => import("./Globe"), {
   ssr: false,
 });
 
-const Globe = forwardRef((props: GlobeProps, ref) => (
+const Globe = forwardRef<GlobeMethods, GlobeProps>((props, ref) => (
   <GlobeTmpl {...props} forwardRef={ref} />
 ));
 
 Globe.displayName = "Globe";
 
+const POV_ALTITUDE = 2;
+
 export function WorldMap({
   position,
-  history,
-  isOut = false,
-}: Readonly<{
-  position: Data;
-  history: Array<Data>;
-  isOut: boolean;
-}>) {
-  const [globeReady, setGlobeReady] = useState(false);
+  avatarUrl,
+}: Readonly<{ position: Data; avatarUrl?: string }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const globeRef = useRef<GlobeMethods>(null);
-  const { width, height } = useElementDimensions(containerRef, globeReady);
+  const { width, height } = useElementDimensions(containerRef);
+
+  const hasValidDimensions = width > 0 && height > 0;
+  const lat = Number(position.coordinates.lat);
+  const lng = Number(position.coordinates.lng);
+
+  const [haveToForceSetup, setHaveToForceSetup] = useState(false);
+
+  const setupGlobe = () => {
+    if (!globeRef.current) return;
+    const controls = globeRef.current.controls();
+    controls.enableZoom = false;
+    controls.enableRotate = false;
+    const setView = () => {
+      globeRef.current?.pointOfView({ lat, lng, altitude: POV_ALTITUDE }, 0);
+    };
+    setView();
+    requestAnimationFrame(() => requestAnimationFrame(setView));
+  };
+
+  useEffect(() => {
+    if (!globeRef.current || haveToForceSetup) return;
+    setHaveToForceSetup(false);
+    setupGlobe();
+  }, [haveToForceSetup]);
 
   return (
-    <div className="relative z-10 flex-1" ref={containerRef}>
-      <Globe
-        ref={globeRef}
-        width={width}
-        height={height}
-        globeImageUrl="/earth.jpg"
-        bumpImageUrl="/earth-black.jpg"
-        onGlobeReady={() => {
-          setGlobeReady(true);
-          if (!globeRef.current) return;
-          globeRef.current.pointOfView({
-            ...position.coordinates,
-            altitude: 1.2,
-          });
-          const controls = globeRef.current.controls();
-          controls.enableZoom = false;
-        }}
-        pointsData={history.map((item) => ({
-          ...item.coordinates,
-          name: item.location,
-        }))}
-        pointColor={useCallback(() => "white", [])}
-        htmlElementsData={[
-          { ...position.coordinates },
-          ...history.map((item) => item.coordinates),
-        ]}
-        htmlElement={(element) => {
-          if (
-            (element as typeof position.coordinates).lat ===
-              position.coordinates.lat &&
-            (element as typeof position.coordinates).lng ===
-              position.coordinates.lng
-          ) {
-            const el = document.createElement("img");
-            el.src = "/avatar.png";
-            el.style.width = `${80}px`;
+    <div
+      className="relative z-10 h-full w-full overflow-visible"
+      ref={containerRef}
+    >
+      {hasValidDimensions && (
+        <Globe
+          ref={globeRef}
+          width={width}
+          height={height}
+          globeImageUrl="/earth.jpg"
+          backgroundColor="rgba(0,0,0,0)"
+          showAtmosphere={true}
+          atmosphereColor="rgba(34, 211, 238, 0.15)"
+          onGlobeReady={() => {
+            if (!globeRef.current) {
+              setHaveToForceSetup(true);
+              return;
+            }
+            setupGlobe();
+          }}
+          htmlElementsData={[{ lat, lng }]}
+          htmlLat="lat"
+          htmlLng="lng"
+          htmlElement={() => {
+            console.log({ avatarUrl });
+            if (!avatarUrl) return document.createElement("div");
 
+            const el = document.createElement("img");
+            el.src = avatarUrl;
+            el.alt = "";
+            el.style.width = "64px";
+            el.style.height = "64px";
+            el.style.minWidth = "64px";
+            el.style.minHeight = "64px";
             el.style.pointerEvents = "auto";
             el.style.cursor = "pointer";
             el.style.borderRadius = "10rem";
-            return el;
-          } else {
-            const el = document.createElement("div");
-            el.style.height = `${20}px`;
-            el.style.width = `${20}px`;
-            el.style.borderRadius = "100%";
-            el.style.backgroundColor = "#FFFFFF90";
+            el.loading = "eager";
 
-            el.style.pointerEvents = "auto";
-            // el.style.cursor = "pointer";
             return el;
+          }}
+          // position ring
+          ringsData={[position.coordinates]}
+          ringColor={() => (t: number) =>
+            `rgba(34, 211, 238, ${0.6 * (1 - t)})`
           }
-        }}
-        // position arc
-        arcsData={
-          isOut
-            ? [
-                {
-                  startLat: DEFAULT_LOCATION.coordinates.lat,
-                  startLng: DEFAULT_LOCATION.coordinates.lng,
-                  endLat: position.coordinates.lat,
-                  endLng: position.coordinates.lng,
-                },
-              ]
-            : undefined
-        }
-        arcDashLength={0.5}
-        arcDashGap={1}
-        arcDashInitialGap={1}
-        arcColor={() => "cyan"}
-        arcDashAnimateTime={1000 * (position.flightTime ?? 1)}
-        arcsTransitionDuration={0}
-        arcStroke={0.5}
-        // position ring
-        ringsData={[position.coordinates]}
-        ringColor={() => (t: number) => `rgba(255,255,255,${1 - t})`}
-        ringMaxRadius={5}
-        ringPropagationSpeed={5}
-        ringRepeatPeriod={((position.flightTime ?? 100) * 0.5) / 3}
-      />
+          ringMaxRadius={5}
+          ringPropagationSpeed={5}
+        />
+      )}
     </div>
   );
 }
 
-function useElementDimensions(
-  elementRef: RefObject<HTMLElement | null>,
-  isReady: boolean
-) {
+function useElementDimensions(elementRef: RefObject<HTMLElement | null>) {
   const [elementDimensions, setElementDimensions] = useState({
     width: 0,
     height: 0,
@@ -135,19 +114,25 @@ function useElementDimensions(
     const element = elementRef.current;
     if (!element) return () => undefined;
 
-    function handleResize() {
+    function measure() {
       if (!element) return;
       const { width, height } = element.getBoundingClientRect();
-      setElementDimensions({
-        width,
-        height,
-      });
+      setElementDimensions((prev) =>
+        prev.width !== width || prev.height !== height
+          ? { width, height }
+          : prev,
+      );
     }
 
-    handleResize();
-    window?.addEventListener("resize", handleResize);
-    return () => window?.removeEventListener("resize", handleResize);
-  }, [elementRef, isReady]);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [elementRef]);
 
   return elementDimensions;
 }

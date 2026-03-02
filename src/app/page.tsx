@@ -1,171 +1,109 @@
 import { WorldMap } from "@/app/Map";
+import Galaxy from "@/components/Galaxy";
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
 import { z } from "zod";
-import { promises as fs } from "fs";
+import { readDb, writeDb, locationSchema } from "@/lib/db";
 import { DEFAULT_LOCATION } from "@/app/constants";
-import { InformationCard } from "@/components/InformationCard";
-import { Topbar } from "@/components/Topbar";
+import { Links } from "@/components/Links";
+import { getCurrentCalendarLocation } from "@/lib/calendar";
 
-const zData = () =>
-  z.object({
-    location: z.string().nullable(),
-    flag: z.string(),
-    hello: z.string(),
-    timezoneOffset: z.number(),
-    coordinates: z.object({ lat: z.number(), lng: z.number() }),
-    flightTime: z.number().nullable(),
+export type Data = z.infer<typeof locationSchema>;
 
-    // maybeDoing: z.array(z.object({ image: z.string(), label: z.string() })),
+async function getDataUncached(): Promise<{ current: Data }> {
+  const db = await readDb();
+  const calendarIcsUrl = process.env.CALENDAR_ICS?.trim() || null;
+  let calendarLocation: Awaited<ReturnType<typeof getCurrentCalendarLocation>> =
+    null;
+
+  if (calendarIcsUrl) {
+    try {
+      calendarLocation = await getCurrentCalendarLocation(calendarIcsUrl);
+    } catch (error) {
+      console.error("Failed to resolve calendar location", error);
+    }
+  }
+
+  const location = calendarLocation?.location ?? null;
+
+  if (!location) {
+    if (db.current) {
+      await writeDb({ current: null });
+    }
+    return { current: DEFAULT_LOCATION };
+  }
+
+  const cached = db.current;
+  if (cached?.location === location) {
+    return { current: cached };
+  }
+
+  const { object } = await generateObject({
+    model: openai("gpt-4"),
+    schema: locationSchema,
+    prompt: `I'm currently in this place "${location}" and I need to share some stuff about this place and what I'm doing, so please give me :
+* the given location
+* the flag emoji of the country of the place
+* the translate of "Hello" in the main language of the place
+* the local timezone offset for today, the ${new Date().toISOString()}, taking care of time changes, I mean in the current timezone is UTC +2 give me 2, if it UTC -6 give me -6
+* the longitude and the latitude of the place.
+* an integer that is a rounded at the first superior of hours of flight time from Paris`,
+    providerOptions: {
+      openai: { strictJsonSchema: true },
+    },
   });
-export type Data = z.infer<ReturnType<typeof zData>>;
 
-export type DataWithHistory = Data & { count: number; lastTime: number };
-export type DataWithPartialHistory = Data &
-  Partial<{ count: number; lastTime: number }>;
+  const newEntry: Data = { ...object };
+  await writeDb({ current: newEntry });
 
-const zDb = () =>
-  z.object({
-    last: z.string().nullable(),
-    history: z.array(
-      zData().merge(
-        z.object({ count: z.number().default(1), lastTime: z.number() })
-      )
-    ),
-  });
-export type Db = z.infer<ReturnType<typeof zDb>>;
-
-const DB_PATH = "/db.json";
+  return { current: newEntry };
+}
 
 const getData = unstable_cache(
-  async (): Promise<{
-    current: DataWithPartialHistory;
-    history: Array<DataWithHistory>;
-  }> => {
-    const file = await fs.readFile(process.cwd() + DB_PATH, "utf8");
-
-    const dbParsed = zDb().safeParse(JSON.parse(file));
-
-    if (!dbParsed.success) {
-      throw new Error("Error while parsing the db", dbParsed.error);
-    }
-
-    const db = dbParsed.data;
-
-    if (!process.env.LOCATION) {
-      if (!db.last) {
-        return {
-          history: db.history,
-          current: DEFAULT_LOCATION,
-        };
-      }
-
-      fs.writeFile(
-        process.cwd() + DB_PATH,
-        JSON.stringify(
-          zDb().parse({
-            last: null,
-            history: db.history,
-          }),
-          null,
-          2
-        )
-      );
-    }
-
-    const currentLocationFromHistory = db.history.find(
-      (item) => item.location === process.env.LOCATION
-    );
-
-    if (currentLocationFromHistory) {
-      const historyWithoutCurrent = db.history.filter(
-        (item) => item.location !== currentLocationFromHistory.location
-      );
-
-      if (db.last === process.env.LOCATION) {
-        return {
-          history: historyWithoutCurrent,
-          current: currentLocationFromHistory,
-        };
-      }
-
-      const updatedCurrent = {
-        ...currentLocationFromHistory,
-        count: currentLocationFromHistory.count + 1,
-        lastTime: new Date().getTime(),
-      };
-      fs.writeFile(
-        process.cwd() + DB_PATH,
-        JSON.stringify(
-          zDb().parse({
-            last: process.env.LOCATION,
-            history: [...historyWithoutCurrent, updatedCurrent],
-          }),
-          null,
-          2
-        )
-      );
-      return {
-        history: historyWithoutCurrent,
-        current: updatedCurrent,
-      };
-    }
-
-    const chatGptResponse = await generateObject({
-      model: openai("gpt-4"),
-      prompt: `I'm currently in this place "${
-        process.env.LOCATION
-      }" and I need to share some stuff about this place and what I'm doing, so please give me :
-      * the given location 
-      * the flag emoji of the country of the place
-      * the translate of "Hello" in the main language of the place
-      * the local timezone offset for today, the ${new Date().toISOString()}, taking care of time changes, I mean in the current timezone is UTC +2 give me 2, if it UTC -6 give me -6
-      * the longitude and the latitude of the place.
-      * an integer that is a rounded at the first superior of hours of flight time from Paris`,
-      schema: zData(),
-    });
-
-    const newValue = {
-      ...chatGptResponse.object,
-      count: 1,
-      lastTime: new Date().getTime(),
-    };
-
-    fs.writeFile(
-      process.cwd() + DB_PATH,
-      JSON.stringify(
-        zDb().parse({
-          last: process.env.LOCATION,
-          history: [...db.history, newValue],
-        }),
-        null,
-        2
-      )
-    );
-
-    return { current: newValue, history: db.history };
-  },
-  [process.env.LOCATION ?? ""],
-  { revalidate: 60 * 60 * 12 } // 60s * 60 * 12 = 12h
+  getDataUncached,
+  [process.env.CALENDAR_ICS ?? ""],
+  { revalidate: 60 * 5 }, // 5 minutes
 );
 
 export default async function Home() {
   const data = await getData();
 
   return (
-    <main className="flex flex-col">
-      <Suspense fallback={<p>Loading...</p>}>
-        <div className="flex flex-col h-screen w-screen">
-          <WorldMap
-            position={data.current}
-            history={data.history}
-            isOut={!!process.env.LOCATION}
-          />
+    <main className="relative min-h-screen bg-black">
+      <div className="fixed inset-0 z-0 opacity-40">
+        <Galaxy transparent />
+      </div>
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center text-white/60">
+            Loading...
+          </div>
+        }
+      >
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center">
+          <div className="home-main relative z-10 flex w-full max-w-md flex-col items-center text-center">
+            <div className="home-subtitle mb-1 flex flex-col gap-0.5 font-medium tracking-widest uppercase">
+              <span className="text-xs">Where Is</span>
+              <span>{process.env.NAME ?? "prdHugo"}</span>
+            </div>
+            <div className="relative h-[min(70vh,480px)] aspect-square w-full max-w-2xl overflow-hidden -my-8">
+              <WorldMap
+                position={data.current}
+                avatarUrl={process.env.AVATAR_URL}
+              />
+            </div>
+            <p className="home-title mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              {data.current.location ?? "Not far from home"}
+            </p>
+            <p className="home-subtitle mt-1">
+              {data.current.hello} 👋 {data.current.flag}
+            </p>
+            <div className="home-divider my-6 h-px w-12" />
+            <Links />
+          </div>
         </div>
-        <Topbar />
-        <InformationCard data={data} />
       </Suspense>
     </main>
   );

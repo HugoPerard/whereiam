@@ -1,6 +1,6 @@
-import { Data } from "@/app/page";
+import type { Location } from "@/lib/db";
 
-export const DEFAULT_LOCATION: Data = {
+export const DEFAULT_LOCATION: Location = {
   location: null,
   flag: "🇫🇷",
   hello: "Bonjour",
