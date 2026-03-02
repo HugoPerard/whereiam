@@ -8,3 +8,8 @@ export const DEFAULT_LOCATION: Location = {
   coordinates: { lat: 49.439999, lng: 1.1 },
   flightTime: null,
 };
+
+export const DEFAULT_DATA = {
+  location: DEFAULT_LOCATION,
+  user: { name: process.env.NAME ?? "prdHugo" },
+};

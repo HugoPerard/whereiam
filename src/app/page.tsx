@@ -1,71 +1,35 @@
 import { WorldMap } from "@/app/Map";
 import Galaxy from "@/components/Galaxy";
-import { openai } from "@ai-sdk/openai";
-import { generateObject } from "ai";
-import { unstable_cache } from "next/cache";
 import { Suspense } from "react";
-import { z } from "zod";
-import { readDb, writeDb, locationSchema } from "@/lib/db";
-import { DEFAULT_LOCATION } from "@/app/constants";
+import { getData, type Location } from "@/lib/get-location";
 import { Links } from "@/components/Links";
-import { getCurrentCalendarLocation } from "@/lib/calendar";
+import { Metadata } from "next";
 
-export type Data = z.infer<typeof locationSchema>;
+export type Data = Location;
 
-async function getDataUncached(): Promise<{ current: Data }> {
-  const db = await readDb();
-  const calendarIcsUrl = process.env.CALENDAR_ICS?.trim() || null;
-  let calendarLocation: Awaited<ReturnType<typeof getCurrentCalendarLocation>> =
-    null;
+export async function generateMetadata(): Promise<Metadata> {
+  const { data } = await getData();
+  const name = process.env.NAME ?? "prdHugo";
+  const location = data.location.location ?? "Not far from home";
+  const title = `${data.location.flag} ${location}`;
+  const description = `${data.location.hello} from ${location} — Where is ${name}`;
 
-  if (calendarIcsUrl) {
-    try {
-      calendarLocation = await getCurrentCalendarLocation(calendarIcsUrl);
-    } catch (error) {
-      console.error("Failed to resolve calendar location", error);
-    }
-  }
-
-  const location = calendarLocation?.location ?? null;
-
-  if (!location) {
-    if (db.current) {
-      await writeDb({ current: null });
-    }
-    return { current: DEFAULT_LOCATION };
-  }
-
-  const cached = db.current;
-  if (cached?.location === location) {
-    return { current: cached };
-  }
-
-  const { object } = await generateObject({
-    model: openai("gpt-4"),
-    schema: locationSchema,
-    prompt: `I'm currently in this place "${location}" and I need to share some stuff about this place and what I'm doing, so please give me :
-* the given location
-* the flag emoji of the country of the place
-* the translate of "Hello" in the main language of the place
-* the local timezone offset for today, the ${new Date().toISOString()}, taking care of time changes, I mean in the current timezone is UTC +2 give me 2, if it UTC -6 give me -6
-* the longitude and the latitude of the place.
-* an integer that is a rounded at the first superior of hours of flight time from Paris`,
-    providerOptions: {
-      openai: { strictJsonSchema: true },
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: `Where is ${name}`,
     },
-  });
-
-  const newEntry: Data = { ...object };
-  await writeDb({ current: newEntry });
-
-  return { current: newEntry };
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
 }
-
-const getData = unstable_cache(
-  getDataUncached,
-  [process.env.CALENDAR_ICS ?? ""],
-  { revalidate: 60 * 5 }, // 5 minutes
-);
 
 export default async function Home() {
   const data = await getData();
@@ -90,15 +54,15 @@ export default async function Home() {
             </div>
             <div className="relative h-[min(70vh,480px)] aspect-square w-full max-w-2xl overflow-hidden -my-8">
               <WorldMap
-                position={data.current}
+                position={data.data.location}
                 avatarUrl={process.env.AVATAR_URL}
               />
             </div>
             <p className="home-title mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-              {data.current.location ?? "Not far from home"}
+              {data.data.location.location ?? "Not far from home"}
             </p>
             <p className="home-subtitle mt-1">
-              {data.current.hello} 👋 {data.current.flag}
+              {data.data.location.hello} 👋 {data.data.location.flag}
             </p>
             <div className="home-divider my-6 h-px w-12" />
             <Links />
