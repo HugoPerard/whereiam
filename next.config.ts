@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
+const avatarUrl = process.env.AVATAR_URL?.trim();
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [new URL(process.env.AVATAR_URL ?? "")],
+    ...(avatarUrl && {
+      remotePatterns: [new URL(avatarUrl)],
+    }),
   },
 };
 

@@ -36,18 +36,18 @@ export default function Globe({
     const globe = createGlobe(canvasRef.current, {
       width,
       height,
-      devicePixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1,
+      devicePixelRatio:
+        typeof window !== "undefined" ? window.devicePixelRatio : 1,
       phi: focusPhi,
       theta: focusTheta,
-      dark: 0.2,
+      dark: 0.7,
       diffuse: 1.2,
       mapSamples: 16000,
-      mapBrightness: 6,
-      baseColor: [0.2, 0.2, 0.25],
+      mapBrightness: 12,
+      baseColor: [0.5, 0.5, 0.55],
       markerColor,
       glowColor: [0.1, 0.1, 0.15],
-      markers: [{ location: [lat, lng], size: 0.06 }],
-      scale: 1,
+      markers: [{ location: [lat, lng], size: 0.08 }],
       onRender: () => {},
     });
 

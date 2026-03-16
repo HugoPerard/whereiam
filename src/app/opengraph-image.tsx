@@ -23,20 +23,25 @@ export default async function OgImage() {
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      <img
-        src={
+      {(() => {
+        const src =
           process.env.NEXT_PUBLIC_BASE_URL
             ? `${process.env.NEXT_PUBLIC_BASE_URL}/android-chrome-512x512.png`
-            : process.env.AVATAR_URL
-        }
-        alt="Logo"
-        style={{
-          width: 448,
-          height: 448,
-          display: "flex",
-          borderRadius: "10rem",
-        }}
-      />
+            : process.env.AVATAR_URL?.trim();
+        if (!src) return null;
+        return (
+          <img
+            src={src}
+            alt="Logo"
+            style={{
+              width: 448,
+              height: 448,
+              display: "flex",
+              borderRadius: "10rem",
+            }}
+          />
+        );
+      })()}
       <div
         style={{
           display: "flex",
