@@ -1,17 +1,66 @@
 "use client";
 
-import GlobeTmpl from "react-globe.gl";
-import type { GlobeProps, GlobeMethods } from "react-globe.gl";
+import createGlobe from "cobe";
+import { useEffect, useRef } from "react";
 
-type GlobeWrapperProps = GlobeProps & {
-  forwardRef?: React.Ref<GlobeMethods | null>;
+function locationToAngles(lat: number, lng: number): [number, number] {
+  return [
+    Math.PI - ((lng * Math.PI) / 180 - Math.PI / 2),
+    (lat * Math.PI) / 180,
+  ];
+}
+
+export type GlobeProps = {
+  width: number;
+  height: number;
+  lat: number;
+  lng: number;
+  /** RGB 0–1, default teal */
+  markerColor?: [number, number, number];
 };
 
-const Globe = ({ forwardRef, ...props }: GlobeWrapperProps) => (
-  <GlobeTmpl
-    {...props}
-    ref={forwardRef ? (forwardRef as React.RefObject<GlobeMethods>) : undefined}
-  />
-);
+export default function Globe({
+  width,
+  height,
+  lat,
+  lng,
+  markerColor = [34 / 255, 211 / 255, 238 / 255],
+}: GlobeProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-export default Globe;
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const [focusPhi, focusTheta] = locationToAngles(lat, lng);
+
+    const globe = createGlobe(canvasRef.current, {
+      width,
+      height,
+      devicePixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1,
+      phi: focusPhi,
+      theta: focusTheta,
+      dark: 0.2,
+      diffuse: 1.2,
+      mapSamples: 16000,
+      mapBrightness: 6,
+      baseColor: [0.2, 0.2, 0.25],
+      markerColor,
+      glowColor: [0.1, 0.1, 0.15],
+      markers: [{ location: [lat, lng], size: 0.06 }],
+      scale: 1,
+      onRender: () => {},
+    });
+
+    return () => globe.destroy();
+  }, [width, height, lat, lng, markerColor]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      className="h-full w-full"
+      style={{ width, height }}
+    />
+  );
+}
