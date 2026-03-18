@@ -48,7 +48,6 @@ export default function Globe({
       markerColor,
       glowColor: [0.1, 0.1, 0.15],
       markers: [{ location: [lat, lng], size: 0.08 }],
-      onRender: () => {},
     });
 
     return () => globe.destroy();
