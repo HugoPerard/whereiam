@@ -62,3 +62,34 @@ body {
   border-color: var(--home-icon-hover-border);
   color: var(--home-icon-hover-text);
 }
+
+/* Globe bindable marker: label (hello) + stickers (emojis) - cobe CSS Anchor Positioning */
+.globe-marker-label {
+  position: absolute;
+  position-anchor: --cobe-location;
+  bottom: calc(anchor(top) + 1.5rem);
+  left: anchor(center);
+  translate: -50% 0;
+  opacity: var(--cobe-visible-location, 0);
+  filter: blur(calc((1 - var(--cobe-visible-location, 0)) * 8px));
+  transition: opacity 0.3s, filter 0.3s;
+  color: var(--home-subtitle);
+  font-weight: 500;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.globe-marker-stickers {
+  position: absolute;
+  position-anchor: --cobe-location;
+  bottom: anchor(top);
+  left: anchor(center);
+  translate: -50% 0;
+  opacity: var(--cobe-visible-location, 0);
+  filter: blur(calc((1 - var(--cobe-visible-location, 0)) * 8px));
+  transition: opacity 0.3s, filter 0.3s;
+  font-size: 1rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
