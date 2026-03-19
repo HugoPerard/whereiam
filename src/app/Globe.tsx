@@ -48,10 +48,19 @@ export default function Globe({
       markerColor,
       glowColor: [0.1, 0.1, 0.15],
       markers: [{ location: [lat, lng], size: 0.08 }],
-      onRender: () => {},
     });
 
-    return () => globe.destroy();
+    let frameId: number;
+    function render() {
+      globe.update({ phi: focusPhi, theta: focusTheta });
+      frameId = requestAnimationFrame(render);
+    }
+    render();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      globe.destroy();
+    };
   }, [width, height, lat, lng, markerColor]);
 
   return (
