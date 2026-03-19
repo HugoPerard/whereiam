@@ -27,6 +27,10 @@ export function WorldMap({
       {hasValidDimensions && (
         <div className="relative h-full w-full">
           <Globe width={width} height={height} lat={lat} lng={lng} />
+          <span className="globe-marker-label">{position.hello}</span>
+          <span className="globe-marker-stickers">
+            👋 {position.flag}
+          </span>
         </div>
       )}
     </div>

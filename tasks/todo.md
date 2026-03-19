@@ -1,5 +1,11 @@
 # Rework: Dependencies + Storage Cleanup
 
+## Globe Labels & Stickers (2025-03-19)
+- [x] Replace "Bonjour 👋 🇫🇷" subtitle with cobe bindable markers
+- [x] Add marker `id: 'location'` for CSS Anchor Positioning
+- [x] Label (hello) and stickers (👋 flag) anchored to marker, follow visibility
+- [x] Remove subtitle paragraph from page.tsx
+
 ## Cobe v2 Upgrade (2025-03-18)
 - [x] Upgrade cobe 0.6.5 → 2.0.0
 - [x] Remove deprecated `onRender` option (no longer in COBEOptions)

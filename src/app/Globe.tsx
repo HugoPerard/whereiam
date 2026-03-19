@@ -47,7 +47,7 @@ export default function Globe({
       baseColor: [0.5, 0.5, 0.55],
       markerColor,
       glowColor: [0.1, 0.1, 0.15],
-      markers: [{ location: [lat, lng], size: 0.08 }],
+      markers: [{ location: [lat, lng], size: 0.08, id: "location" }],
     });
 
     let frameId: number;

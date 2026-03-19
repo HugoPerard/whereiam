@@ -61,9 +61,6 @@ export default async function Home() {
             <p className="home-title mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
               {data.data.location.location ?? "Not far from home"}
             </p>
-            <p className="home-subtitle mt-1">
-              {data.data.location.hello} 👋 {data.data.location.flag}
-            </p>
             <div className="home-divider my-6 h-px w-12" />
             <Links />
           </div>
