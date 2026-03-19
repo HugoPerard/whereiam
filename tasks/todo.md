@@ -3,6 +3,7 @@
 ## Cobe v2 Upgrade (2025-03-18)
 - [x] Upgrade cobe 0.6.5 → 2.0.0
 - [x] Remove deprecated `onRender` option (no longer in COBEOptions)
+- [x] Add requestAnimationFrame loop calling globe.update() (v2 has no internal render loop)
 - [x] Build and lint verified
 
 ## Plan
